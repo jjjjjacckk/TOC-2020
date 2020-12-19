@@ -100,6 +100,7 @@ def webhook_handler():
             continue
         if not isinstance(event.message.text, str):
             continue
+        
         print(f"\nFSM STATE: {machine.state}")
         print(f"REQUEST BODY: \n{body}")
         response = machine.advance(event)
