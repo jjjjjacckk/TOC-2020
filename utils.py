@@ -3,7 +3,7 @@ import os
 from linebot import LineBotApi, WebhookParser
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, \
                            ImageSendMessage, ButtonsTemplate, TemplateSendMessage, \
-                           PostbackAction, MessageAction, URIAction
+                           PostbackAction, MessageAction, URIAction, DatetimePickerAction
 
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
@@ -56,7 +56,7 @@ def send_button_message_template(reply_token, button):
     line_bot_api.reply_message(reply_token, buttons_template_message)
     return "OK"
 
-def send_button_message(reply_token, type):
+def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     line_bot_api = LineBotApi(channel_access_token)
 
     select_sport = TemplateSendMessage(
@@ -116,6 +116,87 @@ def send_button_message(reply_token, type):
         )
     )
 
+    select_date_start = TemplateSendMessage(
+        alt_text='Buttons template',
+        template=ButtonsTemplate(
+            thumbnail_image_url='https://example.com/image.jpg',
+            title='輸入要查詢的「開始」時間區段',
+            text='選擇要查詢的第一天：',
+            actions=[
+                DatetimePickerAction(
+                    type="datetimepicker",
+                    label="選擇開始的日期",
+                    data="type=date_start&date=start",
+                    mode="datetime",
+                    initial="2020-12-20t00:00",
+                    max="2030-02-28t23:59",
+                    min="2020-12-10t00:00"
+                ),
+                PostbackAction(
+                    label='重新選擇場地類型',
+                    display_text='你選擇了「重新選擇場地類型」',
+                    data='type=date_start&date=go_back'
+                ),
+                PostbackAction(
+                    label='取消查詢',
+                    display_text='你選擇了「取消查詢」',
+                    data='type=reset&date=None'
+                )
+            ]
+        )
+    )
+
+    select_date_end = TemplateSendMessage(
+        alt_text='Buttons template',
+        template=ButtonsTemplate(
+            thumbnail_image_url='https://example.com/image.jpg',
+            title='輸入要查詢的「結束」時間區段',
+            text='選擇要查詢的最後一天，若僅要查詢一天，請選擇和開始時間相同的日期',
+            actions=[
+                DatetimePickerAction(
+                    type="datetimepicker",
+                    label="選擇結束的日期",
+                    data="type=date_end&date=end",
+                    mode="datetime",
+                    initial="2020-12-20t00:00",
+                    max="2030-02-28t23:59",
+                    min="2020-12-10t00:00"
+                ),
+                PostbackAction(
+                    label='重新選擇開始時間',
+                    display_text='你選擇了「重新選擇開始時間」',
+                    data='type=date_end&date=go_back'
+                ),
+                PostbackAction(
+                    label='取消查詢',
+                    display_text='你選擇了「取消查詢」',
+                    data='type=reset&day=None'
+                )
+            ]
+        )
+    )
+
+    select_date_confirm = TemplateSendMessage(
+        alt_text='Buttons template',
+        template=ButtonsTemplate(
+            thumbnail_image_url='https://example.com/image.jpg',
+            title='確認選定的日期：',
+            text=str('你選的是：\n- 開始：{0}\n- 結束：{1}？'.format(param['start'], param['end'])),
+            actions=[
+                PostbackAction(
+                    label='是',
+                    display_text='你選擇了「是」',
+                    data='type=confirm&answer=yes'
+                ),
+                PostbackAction(
+                    label='否',
+                    display_text='你選擇了「否」\n請重新選擇日期！',
+                    data='type=confirm&answer=no'
+                )
+            ]
+        )
+    )
+
     select_day = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
@@ -129,13 +210,16 @@ def send_button_message(reply_token, type):
                     data='type=day&day=weekdays'
                 ),
                 PostbackAction(
-                    label='自訂時間',
-                    display_text='你選擇了「自訂時間」',
-                    data='type=day&day=manual'
+                    # label='自訂時間',   
+                    # display_text='你選擇了「自訂時間」',
+                    # data='type=day&day=manual'
+                    label='週末',   
+                    display_text='你選擇了「週末」',
+                    data='type=day&day=weekend'
                 ),
                 PostbackAction(
                     label='重新選擇排球場地類型',
-                    display_text='你選擇了「重新選擇排球場地類型」',
+                    display_text='你選擇了「重新選擇時間」',
                     data='type=day&day=go_back'
                 ),
                 PostbackAction(
@@ -147,7 +231,31 @@ def send_button_message(reply_token, type):
         )
     )
 
-    final = TemplateSendMessage(
+    final_message = '''line1e2
+    '''
+
+    final  = TemplateSendMessage(
+        alt_text='Buttons template',
+        template=ButtonsTemplate(
+            thumbnail_image_url='https://example.com/image.jpg',
+            title='要帶你去借場的網站嗎？',
+            text=final_message,
+            actions=[
+               PostbackAction(
+                    label='正確',
+                    display_text='你選擇了「正確」\n將開始爬取資料...',
+                    data='type=reset&data=None'
+                ),
+                PostbackAction(
+                    label='錯誤',
+                    display_text='你選擇了「錯誤」\n重新選擇球類運動',
+                    data='type=reset&data=None'
+                )
+            ]
+        )
+    )
+
+    rent = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
             thumbnail_image_url='https://example.com/image.jpg',
@@ -162,7 +270,7 @@ def send_button_message(reply_token, type):
                     label='否',
                     display_text='你選擇了「否」',
                     data='type=reset&data=None'
-                ),
+                )
             ]
         )
     )
@@ -173,8 +281,16 @@ def send_button_message(reply_token, type):
         line_bot_api.reply_message(reply_token, select_gender)
     elif type == 'select_day':
         line_bot_api.reply_message(reply_token, select_day)
+    elif type == 'select_date_start':
+        line_bot_api.reply_message(reply_token, select_date_start)
+    elif type == 'select_date_end':
+        line_bot_api.reply_message(reply_token, select_date_end)
+    elif type == 'select_date_confirm':
+        line_bot_api.reply_message(reply_token, select_date_confirm)
     elif type == 'final':
         line_bot_api.reply_message(reply_token, final)
+    else:
+        line_bot_api.reply_message(reply_token, TextMessage(text="No matching button template TT"))
 
     return "OK"
 

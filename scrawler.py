@@ -57,17 +57,8 @@ def gen_dates(start:str, end:str):
                 
         return serial
 
-def get_sport_raw(date:str, sport_in:str):
-    session = requests.session()
+def get_sport_raw(date:str, session, header, sport_in:str):
     url = 'https://cet.acad.ncku.edu.tw/ste/index.php?c=ste11211'
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-        # 'Cookie': 'PHPSESSID=1aea228467450d51917fc7f8f835ff86',
-        'Cookie': 'PHPSESSID=8f4bace3465bd821988e2ed78be708b8'
-        # TODO: 把這邊的 Cookie 改成 CookieJar
-        # 'X-Requested-With': 'XMLHttpRequest'
-    }
-
     payload = {
         'sport': sport_dict[sport_in],
         'sdate': date,
@@ -76,7 +67,7 @@ def get_sport_raw(date:str, sport_in:str):
     }
 
 
-    volleyball = session.post(url=url, headers=headers, data=payload)
+    volleyball = session.post(url=url, headers=header, data=payload)
     # print(session.cookies.get)
     # print(login.cookies, login.cookies.get_dict())
     # print(headers['Cookie'])
@@ -113,10 +104,10 @@ def retreive_form(soup):
     
     return form
 
-def get_mapped_form(time_seq:list, sport:str='排球'):
+def get_mapped_form(time_seq:list, session, header, sport:str='排球'):
     situation = {}
     for dates in time_seq:
-        m = get_sport_raw(dates, sport)
+        m = get_sport_raw(dates, sport_in=sport, header=header, session=session)
         situation[dates] = retreive_form(m)
 
     return situation
