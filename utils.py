@@ -15,6 +15,22 @@ def send_text_message(reply_token, text):
 
     return "OK"
 
+def send_format_text_message(reply_token, sport, gender, date:dict, day):
+    line_bot_api = LineBotApi(channel_access_token)
+
+    if gender == 'boy':
+        field = '男網'
+    elif gender == 'girl':
+        field = '女網'
+    else:
+        field = '男女網都查'
+
+    # message = f'運動: {sport}\n場地類型: {field}\n時間: {date["start"]} ~ {date["end"]}\n星期: {day}'
+    message = f'運動: {sport}\n場地類型: {field}\n時間: {date["start"]} ~ {date["end"]}'
+    confirming = '\n\n若以上訊息皆正確，請輸入「正確」來開始爬蟲\n若有錯誤，請輸入「重新查詢」來重新輸入相關資訊'
+
+    line_bot_api.reply_message(reply_token, TextSendMessage(text=message+confirming))
+
 def send_image_message(reply_token, url):
     line_bot_api = LineBotApi(channel_access_token)
     message = ImageSendMessage(
@@ -176,6 +192,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         )
     )
 
+    # this is redundant
     select_date_confirm = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
@@ -231,20 +248,19 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         )
     )
 
-    final_message = '''line1e2
-    '''
+    final_message = f'sport: {123}'
 
-    final  = TemplateSendMessage(
+    confirm  = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
             thumbnail_image_url='https://example.com/image.jpg',
-            title='要帶你去借場的網站嗎？',
+            title='以下是你輸入的資料，請問都正確嗎？',
             text=final_message,
             actions=[
                PostbackAction(
                     label='正確',
                     display_text='你選擇了「正確」\n將開始爬取資料...',
-                    data='type=reset&data=None'
+                    data='type=rent&data=correct'
                 ),
                 PostbackAction(
                     label='錯誤',
@@ -285,10 +301,10 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         line_bot_api.reply_message(reply_token, select_date_start)
     elif type == 'select_date_end':
         line_bot_api.reply_message(reply_token, select_date_end)
-    elif type == 'select_date_confirm':
-        line_bot_api.reply_message(reply_token, select_date_confirm)
-    elif type == 'final':
-        line_bot_api.reply_message(reply_token, final)
+    elif type == 'confirm':
+        line_bot_api.reply_message(reply_token, confirm)
+    elif type == 'rent':
+        line_bot_api.reply_message(reply_token, rent)
     else:
         line_bot_api.reply_message(reply_token, TextMessage(text="No matching button template TT"))
 

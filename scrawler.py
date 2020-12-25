@@ -47,15 +47,15 @@ time_dict = {
 }
 
 def gen_dates(start:str, end:str):
-        start_date = datetime.strptime(start, '%Y%m%d')
-        end_date = datetime.strptime(end, '%Y%m%d')
-        serial = []
-        if (end_date - start_date).days >= 0:
-            for i in range((end_date - start_date).days+1):
-                tmp = start_date + timedelta(days=i)
-                serial.append('{0:>{3}4}{1:>{3}2}{2:>{3}2}'.format(tmp.year, tmp.month, tmp.day, 0))
-                
-        return serial
+    start_date = datetime.strptime(start, '%Y%m%d')
+    end_date = datetime.strptime(end, '%Y%m%d')
+    serial = []
+    if (end_date - start_date).days >= 0:
+        for i in range((end_date - start_date).days+1):
+            tmp = start_date + timedelta(days=i)
+            serial.append('{0:>{3}4}{1:>{3}2}{2:>{3}2}'.format(tmp.year, tmp.month, tmp.day, 0))
+            
+    return serial
 
 def get_sport_raw(date:str, session, header, sport_in:str):
     url = 'https://cet.acad.ncku.edu.tw/ste/index.php?c=ste11211'
@@ -112,7 +112,7 @@ def get_mapped_form(time_seq:list, session, header, sport:str='排球'):
 
     return situation
 
-def find_free_time(seq:list, situation:dict, gender:str='a'):
+def find_free_time(seq:list, situation:dict, gender:str='both'):
     # gender = 'a' -> both gender
     free = []
     for dates in seq:
@@ -121,10 +121,10 @@ def find_free_time(seq:list, situation:dict, gender:str='a'):
                 # print(situation[dates][row][column])
                 if isinstance(situation[dates][row][column], type(None)):
                     element = '{0} | {1} | {2}'.format(dates[4:6]+'/'+dates[6:], time_dict[str(column)], volley_court_dict[str(row*10+column).zfill(2)])
-                    if gender.lower() == 'b': # boy
+                    if gender.lower() == 'boy': # boy
                         if row in [3, 4, 5]:
                             continue
-                    elif gender.lower() == 'g': # girl
+                    elif gender.lower() == 'girl': # girl
                         if row not in [3, 4, 5]:
                             continue
                     free.append(element)

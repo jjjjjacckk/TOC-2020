@@ -16,7 +16,7 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 from linebot.models.events import PostbackEvent
 
 from fsm import TocMachine
-from utils import send_button_message, send_text_message, send_image_message
+from utils import send_button_message, send_format_text_message, send_text_message, send_image_message
 import scrawler 
 
 load_dotenv()
@@ -29,24 +29,49 @@ load_dotenv()
 
 machine = TocMachine(
     states=[
-        "state1", "state2", "state3",
-        "input_dates_start", "input_dates_end",
-        "input_dates_finish", 
-        "not_login", "get_ID", "get_PWD", "get_VCODE", "logged_in"],
-    transitions=[
-        {"trigger": "advance", "source": "not_login", "dest": "state1", "conditions": "is_going_to_state1"},
-        {"trigger": "advance", "source": "not_login", "dest": "state2", "conditions": "is_going_to_state2"},
-        {"trigger": "advance", "source": "not_login", "dest": "state3", "conditions": "is_going_to_state3"},
-        {"trigger": "advance", "source": "not_login", "dest": "input_dates_start", "conditions": "is_going_to_DateStart"},
-        {"trigger": "advance", "source": "input_dates_start", "dest": "input_dates_end", "conditions": "is_going_to_DateEnd"},
-        {"trigger": "advance", "source": "input_dates_end", "dest": "input_dates_finish", "conditions": "is_going_to_DateFinish"},
-        {
-            "trigger": "go_back",
-            "source": ["state1", "state2", "state3", "input_dates_start", "input_dates_end", "input_dates_finish"], 
-            "dest": "not_login"
-        },
+        "input_dates_start", "input_dates_end", "input_dates_finish", 
+        "init", "not_login", "get_ID", "get_PWD", "logged_in",
+        "ch_sport", "ch_gender", "ch_date_start", "ch_date_end", "ch_day", "confirm", "rent"
     ],
-    initial="not_login",
+    transitions=[
+        {"trigger": "advance", "source": "init", "dest": "not_login", "conditions": "is_going_to_not_login"},
+        {"trigger": "advance", "source": "not_login", "dest": "get_ID", "conditions": "is_going_to_get_ID"},
+        {"trigger": "advance", "source": "get_ID", "dest": "get_PWD", "conditions": "is_going_to_get_PWD"},
+        {"trigger": "advance", "source": "logged_in", "dest": "ch_sport", "conditions": "is_going_to_ch_sport"},
+        
+        {"trigger": "sport2Gender", "source": "ch_sport", "dest": "ch_gender"},
+        {"trigger": "gender2DateStart", "source": "ch_gender", "dest": "ch_date_start"},
+
+        {"trigger": "DateStart2DateEnd", "source": "ch_date_start", "dest": "ch_date_end"},
+        {"trigger": "DateStart2Gender", "source": "ch_date_start", "dest": "ch_gender"},
+
+        {"trigger": "DateEnd2Day", "source": "ch_date_end", "dest": "ch_day"},
+        {"trigger": "DateEnd2Confirm", "source": "ch_date_end", "dest": "confirm"},
+        {"trigger": "DateEnd2DateStart", "source": "ch_date_end", "dest": "ch_date_start"},
+
+        {"trigger": "day2Confirm", "source": "ch_day", "dest": "confirm"},
+        {"trigger": "day2DateStart", "source": "ch_day", "dest": "ch_date_start"},
+
+        {"trigger": "confirm2Rent", "source": "confirm", "dest": "rent"},
+        
+        {"trigger": "suc_LOGIN", "source": "get_PWD", "dest": "logged_in"},
+        {
+            "trigger": "back2LoggedIn",
+            "source": ["ch_sport", "ch_date_start", "ch_date_end", "ch_day", "rent"], 
+            "dest": "logged_in"
+        },
+        {
+            "trigger": "back2ChooseSport",
+            "source": ["ch_gender", "ch_date_start", "ch_date_end", "ch_day", "confirm"],
+            "dest": "ch_sport"
+        },
+        {
+            "trigger": "back2NotLogin",
+            "source": ["get_ID", "get_PWD"],
+            "dest": "not_login"
+        }
+    ],
+    initial="init",
     auto_transitions=False,
     show_conditions=True,
 )
@@ -104,6 +129,30 @@ def login(user_id, passwd, vcode):
     a = session.post(url=url, headers=headers_new, data=payload, verify=False)
     # print(a.text)
     return a
+
+def to_scrawler(event):
+    global sport, gender, date, day, machine, session, headers_new
+    print(sport, gender, date, day, machine, session, headers_new)
+    seq = scrawler.gen_dates(date['start'], date['end'])
+    # print('\nSEQ!\n')
+    total = scrawler.get_mapped_form(time_seq=seq, session=session, header=headers_new, sport=sport)
+    # print(total)
+    # print('\nTOTAL\n')
+    outcome_list = scrawler.format_free_time(scrawler.find_free_time(seq, total, gender))
+
+    print('Done searching...')
+    
+    text = ''
+    for content in outcome_list:
+        text += content
+        text += '\n'
+    
+    print('\n', text, sep='')
+    t = 'FINISH\nAbout to end...\n'
+
+    instruction = '\n> 請輸入 「rent」 請輸入「rent」來開啟借場系統的網頁 <'
+
+    send_text_message(event.reply_token, text+instruction)
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -164,24 +213,69 @@ def webhook_handler():
             send_text_message(event.reply_token, "IN HANDLER\n")
 
         print(f'\nlogin state: {login_state} {len(event.message.text)}')
-        print(f"\nFSM STATE: {machine.state}")
+        print(f"\nFSM BEFORE STATE: {machine.state}")
         print(f"REQUEST BODY: \n{body}")
         print(f'EVENT: \n{event}')
-        response = machine.advance(event)
+
+        if machine.state == 'confirm':
+            if event.message.text == '正確':
+                response = machine.confirm2Rent()
+                print(f'\nresponse: {response}')
+                to_scrawler(event)
+            else:
+                date['start'] = date['end'] = ''
+                sport = gender = day = ''
+                response = machine.back2ChooseSport()
+        elif machine.state == 'rent':
+            if event.message.text == 'rent':
+                response = machine.back2LoggedIn()
+                send_button_message(event.reply_token, 'rent')
+            else:
+                response = False
+        else:
+            response = machine.advance(event)
+        
+        print(f"\nFSM AFTER STATE: {machine.state}")
         print(f'response: \n{response}')
 
         if response == False:
-            if login_state == 0 and event.message.text.lower() == 'login':
-                login_state = 1
+            if machine.state == 'init':
+                login_state = 0
                 # send_image_message(event.reply_token, 'https://402c6f9347ae.ngrok.io/show-verify-code')
-                send_text_message(event.reply_token, "請輸入你的學號")
+
+                # send_button_message(event.reply_token, 'select_sport')
+                send_text_message(event.reply_token, "請先輸入「login」來登入！(response = False, init)")
+            elif machine.state == 'not_login':
+                send_text_message(event.reply_token, "請輸入你的學號(response = False, not_login)")
+            elif machine.state == 'get_ID':
+                if event.message.text.lower() == "+++": # on enter PWD,
+                    machine.back2NotLogin()
+                    send_text_message(event.reply_token, "請輸入你的學號(response = False, getID)")
+            elif machine.state == 'get_PWD':
+                if event.message.text.lower() == "+++":
+                    machine.back2NotLogin()
+                    send_text_message(event.reply_token, "請輸入你的學號(response = False, getPWD)")
+            elif machine.state == 'logged_in':
+                send_text_message(event.reply_token, "請輸入「開始查詢」！")
+            elif machine.state == 'confirm':
+                if event.message.text == '正確':
+                    machine.confirm2rent()
+                    scrawler(event)
+                elif event.message.text == '重新查詢':
+                    date['start'] = date['end'] = ''
+                    sport = gender = day = ''
+                    machine.back2ChooseSport()
+                    send_button_message(event.reply_token, 'select_sport')
+            elif machine.state == 'rent':
+                send_text_message(event.reply_token, '請輸入「rent」來開啟借場系統的網頁')
+            
             elif login_state == 1 and len(event.message.text) == 9:
                 if event.message.text.lower().find('f') == -1:
                     send_text_message(event.reply_token, "請輸入你的學號")
                 else:
                     login_state = 2
                     user_id = event.message.text
-                    send_text_message(event.reply_token, "請輸入你的密碼\n- 輸入 +++ 能讓你重新輸入學號\n- 輸入密碼後，請輸入圖片中的數字")
+                    send_text_message(event.reply_token, "請輸入你的密碼\n- 輸入 +++ 能讓你重新輸入學號")
             elif login_state == 2:
                 if event.message.text.lower() == '+++':
                     login_state = 1
@@ -241,7 +335,7 @@ def webhook_handler():
                         machine.go_back()
                         print(f'\nGoing back\n')
                 elif event.message.text.lower() == 'scrawler':
-                    seq = scrawler.gen_dates('20201225', '20201226')
+                    seq = scrawler.gen_dates('20201225', '20201231')
                     print('\nSEQ!\n')
                     total = scrawler.get_mapped_form(time_seq=seq, session=session, header=headers_new, sport='排球')
                     print(total)
@@ -269,14 +363,55 @@ def webhook_handler():
                     send_button_message(event.reply_token, 'final')
             else:
                 send_text_message(event.reply_token, "請先輸入「login」來登入！")
+        else:
+            if machine.state == 'not_login':
+                print('In not login\n')
+            elif machine.state == 'get_ID':
+                user_id = event.message.text
+                print('userID = get_ID\n')
+            elif machine.state == 'get_PWD':
+                password = event.message.text
+                print('password = get_PWD\n')
+                # user_id = event.message.text
 
+                # print("IDK...\n")
+                # password = event.message.text
+
+                # get verify code
+                verify_url = 'https://cet.acad.ncku.edu.tw/ste/index.php?c=verifycode'
+                response = session.get(url=verify_url, stream=True, verify=False)
+                f = open('check.png', 'wb')
+                shutil.copyfileobj(response.raw, f)
+                f.close()
+                # display(Image('check.png'))
+
+                # extract numbers from verify code
+                img = II.open('check.png')
+                vcode = pytesseract.image_to_string(img, lang='eng')
+                vcode = vcode[0:4]
+                print(vcode)
+
+                # login
+                html = login(user_id, password, vcode)
+                # print(html)
+                if html.text.find('排球') == -1:
+                    machine.back2NotLogin()
+                    send_text_message(event.reply_token, "學號、密碼或驗證碼有輸入錯誤，請重新登入")
+                else:
+                    machine.suc_LOGIN()
+                    # cookie_dict = session.cookies.get_dict()
+                    # headers_new['Cookie'] = cookie_dict['PHPSESSID']
+                    send_text_message(event.reply_token, "登入成功！\n請輸入「開始查詢」來輸入查詢資料")
+                # send_image_message(event.reply_token, 'https://402c6f9347ae.ngrok.io/show-verify-code')
+            elif machine.state == 'ch_sport':
+                send_button_message(event.reply_token, 'select_sport')
 
     return "OK"
 
 # handle PostBack event from 'button'
 @handler.add(PostbackEvent)
 def handle_postback(event):
-    global sport, gender, date, day
+    global sport, gender, date, day, machine
     print(f'\n\n\nevent: {event}\n\n\n')
 
     init = event.postback.data
@@ -290,11 +425,9 @@ def handle_postback(event):
     print('\nTEST:', (data[0][1] == 'date_start'))
 
     if data[0][1] == 'sport':
-        if data[1][1] == 'None':
-            sport = ''
-            send_text_message(event.reply_token, '已經回到初始狀態')
-        elif data[1][1] == 'volley':
+        if data[1][1] == 'volley':
             sport = '排球'
+            machine.sport2Gender()
             send_button_message(event.reply_token, 'select_gender')
         elif data[1][1] == 'basket':
             sport = '籃球'
@@ -302,49 +435,63 @@ def handle_postback(event):
     elif data[0][1] == 'gender':
         if data[1][1] == 'go_back':
             gender = ''
+            machine.back2ChooseSport()
             send_button_message(event.reply_token, 'select_sport')
         else:
             gender = data[1][1]
+            machine.gender2DateStart()
             send_button_message(event.reply_token, 'select_date_start')
     elif data[0][1] == 'date_start':
         # print("\n\n\n\n\nTTT\n\n\n\n")
-        print(f'\n\nevent: {event}\n\n')
+        # print(f'\n\nevent: {event}\n\n')
         if data[1][1] == 'start':
             time = event.postback.params['datetime']
             date['start'] = time[0:4] + time[5:7] + time[8:10]
-            print(f'IN DATE_START\n')
+            machine.DateStart2DateEnd()
+            # print(f'IN DATE_START\n')
             send_button_message(event.reply_token, 'select_date_end')
         elif data[1][1] == 'go_back':
             date['start'] = date['end'] = ''
+            machine.DateStart2Gender()
             send_button_message(event.reply_token, 'select_gender')
         # send_button_message(event.reply_token, 'select_date_end')
     elif data[0][1] == 'date_end':
         if data[1][1] == 'end':
             time = event.postback.params['datetime']
             date['end'] = time[0:4] + time[5:7] + time[8:10]
-            send_button_message(event.reply_token, 'select_date_confirm', date)
+
+            # I got no time for this :(
+            # machine.DateEnd2Day()
+            # send_button_message(event.reply_token, 'select_day')
+            machine.DateEnd2Confirm()
+            send_format_text_message(event.reply_token, sport=sport, gender=gender, date=date, day=day)
         elif data[1][1] == 'go_back':
             date['start'] = date['end'] = ''
-            send_button_message(event.reply_token, 'select_date_start')
-    elif data[0][1] == 'confirm':
-        if data[1][1] == 'yes':
-            send_button_message(event.reply_token, 'select_day')
-        elif data[1][1] == 'no':
-            date['start'] = date['end'] = ''
+            machine.DateEnd2DateStart()
             send_button_message(event.reply_token, 'select_date_start')
     elif data[0][1] == 'day':
         if data[1][1] == 'go_back':
             day = ''
+            date['start'] = date['end'] = ''
+            machine.day2DateStart()
             send_button_message(event.reply_token, 'select_date_start')
         elif data[1][1] == 'weekdays':
             day = 'weekdays'
-            send_button_message(event.reply_token, 'final')
+            machine.day2Confirm()
+            send_format_text_message(event.reply_token, sport=sport, gender=gender, date=date, day=day)
         elif data[1][1] == 'weekend':
             day = 'weekend'
-            send_button_message(event.reply_token, 'final')
+            machine.day2Confirm()
+            send_format_text_message(event.reply_token, sport=sport, gender=gender, date=date, day=day)
+    elif data[0][1] == 'rent':
+        if data[1][1] == 'correct':
+            machine.back2ChooseSport()
+            print("\n\n\n開始爬蟲啦！！！\n\n\n")
+
     elif data[0][1] == 'reset':
         date['start'] = date['end'] = ''
         sport = gender = day = ''
+        machine.back2ChooseSport()
         send_text_message(event.reply_token, '已經回到初始狀態')
 
     print(f'sport: {sport}\ngender: {gender}\nday: {day}\ndate: {date}\n')

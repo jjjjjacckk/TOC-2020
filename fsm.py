@@ -7,95 +7,132 @@ class TocMachine(GraphMachine):
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
 
-    # state1
-    def is_going_to_state1(self, event):
+    # not_login
+    def is_going_to_not_login(self, event):
         text = event.message.text
-        return text.lower() == "go to state1"
+        return text.lower() == "login"
 
-    def on_enter_state1(self, event):
-        print("I'm entering state1")
+    def on_enter_not_login(self, event=None):
+        print("I'm entering \"not_login\"")
 
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state1")
-        self.go_back()
-
-    def on_exit_state1(self):
-        print("Leaving state1")
-
-    # state2
-    def is_going_to_state2(self, event):
-        text = event.message.text
-        return text.lower() == "go to state2"
-
-    def on_enter_state2(self, event):
-        print("I'm entering state2")
-
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state2")
-        self.go_back()
-
-    def on_exit_state2(self):
-        print("Leaving state2")
-
-    # state3
-    def is_going_to_state3(self, event):
-        text = event.message.text
-        return text.lower() == "go to state3"
-
-    def on_enter_state3(self, event):
-        print("I'm entering state3")
-
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state3")
-        self.go_back()
-
-    def on_exit_state3(self):
-        print("Leaving state3")
-
-    # input_dates_start
-    def is_going_to_DateStart(self, event):
-        text = event.message.text
-        return text.lower() == "go to datestart"
-
-    def on_enter_input_dates_start(self, event):
-        print("I'm entering DateStart")
-
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger DateStart")
+        if event != None:
+            reply_token = event.reply_token
+            send_text_message(reply_token, "請輸入你的學號(machine)")
         # self.go_back()
 
-    def on_exit_input_dates_start(self, event):
-        print(f'\n\nevent: \n{event}\n\n')
-        print("Leaving DateStart")
+    def on_exit_not_login(self, event=None):
+        print("Leaving not_login")
 
-    # input_dates_end
-    def is_going_to_DateEnd(self, event):
+    # get_ID
+    def is_going_to_get_ID(self, event):
         text = event.message.text
-        return text.lower() == "go to dateend"
+        return (text.lower().find('f') != -1 and len(text) == 9)
 
-    def on_enter_input_dates_end(self, event):
-        print("I'm entering DateEnd")
+    def on_enter_get_ID(self, event):
+        print("I'm entering \"get_ID\"")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger DateEnd")
+        send_text_message(reply_token, "請輸入你的密碼\n- 輸入 +++ 能讓你重新輸入學號(machine)")
         # self.go_back()
 
-    def on_exit_input_dates_end(self, event):
-        print(type(event))
-        print("Leaving DateEnd")
-    
-    # input_dates_finish
-    def is_going_to_DateFinish(self, event):
+    def on_exit_get_ID(self, event=None):
+        print("Leaving get_ID")
+
+    # get_PWD
+    def is_going_to_get_PWD(self, event):
         text = event.message.text
-        return text.lower() == "go to datefinish"
+        return text.lower() != "+++"
 
-    def on_enter_input_dates_finish(self, event):
-        print("I'm entering DateFinish")
+    def on_enter_get_PWD(self, event):
+        print("I'm entering \"get_PWD\"")
 
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger DateFinish")
-        self.go_back()
+        # reply_token = event.reply_token
+        # send_text_message(reply_token, "loggin...(machine)")
+        # self.go_back()
 
-    def on_exit_input_dates_finish(self):
-        print("Leaving DateFinish")
+    def on_exit_get_PWD(self, event=None):
+        print("Leaving get_PWD")
+
+    # logged_in
+    def on_enter_logged_in(self, event=None):
+        print("I'm entering logged_in")
+
+        if event != None:
+            reply_token = event.reply_token
+            send_text_message(reply_token, "Trigger logged_in")
+        # self.go_back()
+
+    def on_exit_logged_in(self, event=None):
+        if event != None:
+            print(event)
+        print("Leaving logged_in")
+
+    # ch_sport
+    def is_going_to_ch_sport(self, event=None):
+        if event != None:
+            text = event.message.text
+            return text == "開始查詢"
+
+    def on_enter_ch_sport(self, event=None):
+        print("I'm entering ch_sport")
+
+    def on_exit_ch_sport(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving ch_sport")
+
+    # ch_gender
+    def on_enter_ch_gender(self, event=None):
+        print("I'm entering ch_gender")
+
+    def on_exit_ch_gender(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving ch_gender")
     
+    # ch_dates_start
+    def on_enter_ch_dates_start(self, event=None):
+        print("I'm entering ch_date_tart")
+        # self.go_back()
+
+    def on_exit_ch_dates_start(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving ch_date_tart")
+
+    # ch_dates_end
+    def on_enter_ch_dates_end(self, event=None):
+        print("I'm entering ch_date_end")
+        # self.go_back()
+
+    def on_exit_ch_dates_end(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving ch_date_end")
+    
+    # ch_day
+    def on_enter_ch_day(self, event=None):
+        print("I'm entering ch_day")
+
+    def on_exit_ch_day(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving ch_day")
+    
+    # confirm
+    def on_enter_confirm(self, event=None):
+        print("I'm entering confirm")
+
+    def on_exit_confirm(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving confirm")
+
+    # rent
+    def on_enter_rent(self, event=None):
+        print("I'm entering rent")
+
+    def on_exit_rent(self, event=None):
+        if event != None:
+            print(f'\n\nevent: \n{event}\n\n')
+        print("Leaving rent")
