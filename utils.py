@@ -4,7 +4,7 @@ from linebot import LineBotApi, WebhookParser
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, \
                            ImageSendMessage, ButtonsTemplate, TemplateSendMessage, \
                            PostbackAction, MessageAction, URIAction, DatetimePickerAction
-
+from datetime import datetime, timedelta
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 
@@ -87,11 +87,11 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
                     display_text='你選擇了「排球」',
                     data='type=sport&ball=volley'
                 ),
-                PostbackAction(
-                    label='籃球',
-                    display_text='你選擇了「籃球」',
-                    data='type=sport&ball=basket'
-                ),
+                # PostbackAction(
+                #     label='籃球',
+                #     display_text='你選擇了「籃球」',
+                #     data='type=sport&ball=basket'
+                # ),
                 PostbackAction(
                     label='回到初始狀態',
                     display_text='你選擇了「回到初始狀態」',
@@ -132,6 +132,9 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         )
     )
 
+    today = datetime.today()
+    today = today.strftime("%Y-%m-%dt00:00")
+
     select_date_start = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
@@ -144,7 +147,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
                     label="選擇開始的日期",
                     data="type=date_start&date=start",
                     mode="datetime",
-                    initial="2020-12-20t00:00",
+                    initial=today,
                     max="2030-02-28t23:59",
                     min="2020-12-10t00:00"
                 ),
@@ -174,7 +177,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
                     label="選擇結束的日期",
                     data="type=date_end&date=end",
                     mode="datetime",
-                    initial="2020-12-20t00:00",
+                    initial=today,
                     max="2030-02-28t23:59",
                     min="2020-12-10t00:00"
                 ),
