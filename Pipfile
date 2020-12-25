@@ -19,6 +19,7 @@ pytesseract = "*"
 tesseract = "*"
 opencv-python = "*"
 pip = "*"
+opencv-contrib-python = "*"
 
 [requires]
 python_version = "3.6"
