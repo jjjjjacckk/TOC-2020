@@ -47,7 +47,7 @@ def send_button_message_template(reply_token, button):
     buttons_template_message = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='Menu',
             text='Please select',
             actions=[
@@ -78,7 +78,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     select_sport = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='球類運動',
             text='選擇要查詢哪一種球類場地',
             actions=[
@@ -104,7 +104,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     select_gender = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='排球場地類型',
             text='選擇要查男網、女網、或是都查',
             actions=[
@@ -138,7 +138,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     select_date_start = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='輸入要查詢的「開始」時間區段',
             text='選擇要查詢的第一天：',
             actions=[
@@ -168,7 +168,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     select_date_end = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='輸入要查詢的「結束」時間區段',
             text='選擇要查詢的最後一天。\n若僅查詢一天，請選擇「和開始時間相同」的日期',
             actions=[
@@ -198,7 +198,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     select_day = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='選擇要查詢的星期',
             text='例：選擇星期一、四，則只會公布選擇時間區間中，星期一、四的空場時間',
             actions=[
@@ -234,7 +234,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     confirm  = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='以下是你輸入的資料，請問都正確嗎？',
             text=final_message,
             actions=[
@@ -255,7 +255,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
     rent = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
+            thumbnail_image_url='https://github.com/jjjjjacckk/TOC-2020/blob/master/img/button_pic.JPG/?raw=True',
             title='要帶你去借場的網站嗎？',
             text='- 是：會開啟借場網站\n- 否：重新回到初始狀態',
             actions=[
