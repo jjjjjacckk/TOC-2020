@@ -1,4 +1,4 @@
--i https://pypi.org/simple
+# -i https://pypi.org/simple
 pip==20.3.3
 certifi==2019.9.11
 chardet==3.0.4
