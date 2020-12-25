@@ -2,4 +2,8 @@ graphviz
 libgraphviz-dev
 pkg-config
 python-opencv
-libsm6, libxrender1, libfontconfig1, libice6
+libpq-dev
+libsm6
+libxrender1
+libfontconfig1
+libice6
