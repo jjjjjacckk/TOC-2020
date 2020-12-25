@@ -16,7 +16,6 @@ lxml = "*"
 bs4 = "*"
 pillow = "*"
 pytesseract = "*"
-opencv-python = "*"
 tesseract = "*"
 
 [requires]
