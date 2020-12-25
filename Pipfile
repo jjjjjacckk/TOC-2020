@@ -17,6 +17,8 @@ bs4 = "*"
 pillow = "*"
 pytesseract = "*"
 tesseract = "*"
+opencv-python = "*"
+pip = "*"
 
 [requires]
 python_version = "3.6"
