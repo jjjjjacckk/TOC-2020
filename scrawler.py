@@ -66,21 +66,8 @@ def get_sport_raw(date:str, session, header, sport_in:str):
         'm': 'read'
     }
 
-
     volleyball = session.post(url=url, headers=header, data=payload)
-    # print(session.cookies.get)
-    # print(login.cookies, login.cookies.get_dict())
-    # print(headers['Cookie'])
-
-    # if login.cookies.get_dict():        #保持cookie有效
-        # login.cookies.update(login.cookies)
-    # volleyball = session.post(url=url_get, headers=headers, data=payload)
-    # print(login.cookies, bool(login.cookies.get_dict()))
-    # print(login.text)
-    # print(volleyball.text)
-    # with open('test.html', 'w', encoding='utf-8') as fp:
-    #     fp.write(volleyball.text)
-
+    
     # replace is for '體育室 <br/>(數學系)' (in raw)
     # but in '體育室 <br>(數學系)' (in html)
     return bs(volleyball.text.replace('<br>', ''), 'html.parser')
@@ -113,7 +100,6 @@ def get_mapped_form(time_seq:list, session, header, sport:str='排球'):
     return situation
 
 def find_free_time(seq:list, situation:dict, gender:str='both'):
-    # gender = 'a' -> both gender
     free = []
     for dates in seq:
         for row in range(7):
@@ -139,7 +125,7 @@ def format_free_time(free:list):
                 old = int(lines[0:2] + lines[3:5])
             elif old != int(lines[0:2] + lines[3:5]):
                 old = int(lines[0:2] + lines[3:5])
-                new_free.append('-' * (len(lines)))
+                new_free.append('-' * (len(lines) + 5))
             new_free.append(lines)
     
     return new_free
@@ -148,8 +134,8 @@ def format_free_time(free:list):
 if __name__ == '__main__':
     seq = gen_dates('20201224', '20201231')
     get_sport_raw('20201223', '排球')
-    # total = get_mapped_form(seq)
-    # outcome_list = format_free_time(find_free_time(seq, total, 'b'))
+    total = get_mapped_form(seq)
+    outcome_list = format_free_time(find_free_time(seq, total, 'b'))
 
     # for content in outcome_list:
     #     print(content)

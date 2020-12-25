@@ -17,8 +17,7 @@ class TocMachine(GraphMachine):
 
         if event != None:
             reply_token = event.reply_token
-            send_text_message(reply_token, "請輸入你的學號(machine)")
-        # self.go_back()
+            send_text_message(reply_token, "請輸入你的學號")
 
     def on_exit_not_login(self, event=None):
         print("Leaving not_login")
@@ -32,8 +31,7 @@ class TocMachine(GraphMachine):
         print("I'm entering \"get_ID\"")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "請輸入你的密碼\n- 輸入 +++ 能讓你重新輸入學號(machine)")
-        # self.go_back()
+        send_text_message(reply_token, "請輸入你的密碼\n- 輸入 +++ 能讓你重新輸入學號")
 
     def on_exit_get_ID(self, event=None):
         print("Leaving get_ID")
@@ -46,10 +44,6 @@ class TocMachine(GraphMachine):
     def on_enter_get_PWD(self, event):
         print("I'm entering \"get_PWD\"")
 
-        # reply_token = event.reply_token
-        # send_text_message(reply_token, "loggin...(machine)")
-        # self.go_back()
-
     def on_exit_get_PWD(self, event=None):
         print("Leaving get_PWD")
 
@@ -60,7 +54,6 @@ class TocMachine(GraphMachine):
         if event != None:
             reply_token = event.reply_token
             send_text_message(reply_token, "Trigger logged_in")
-        # self.go_back()
 
     def on_exit_logged_in(self, event=None):
         if event != None:
