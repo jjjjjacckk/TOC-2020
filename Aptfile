@@ -1,7 +1,6 @@
 graphviz
 libgraphviz-dev
 pkg-config
-python-opencv
 libpq-dev
 libsm6
 libxrender1
