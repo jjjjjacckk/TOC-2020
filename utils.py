@@ -27,7 +27,7 @@ def send_format_text_message(reply_token, sport, gender, date:dict, day):
 
     # message = f'運動: {sport}\n場地類型: {field}\n時間: {date["start"]} ~ {date["end"]}\n星期: {day}'
     message = f'運動: {sport}\n場地類型: {field}\n時間: {date["start"]} ~ {date["end"]}'
-    confirming = '\n\n若以上訊息皆正確，請輸入「正確」來開始爬蟲\n若有錯誤，請輸入「重新查詢」來重新輸入相關資訊'
+    confirming = '\n\n- 若以上訊息皆正確，請輸入「正確」來開始爬蟲\n- 若有錯誤，請輸入「重新查詢」來重新輸入相關資訊'
 
     line_bot_api.reply_message(reply_token, TextSendMessage(text=message+confirming))
 
@@ -170,7 +170,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         template=ButtonsTemplate(
             thumbnail_image_url='https://example.com/image.jpg',
             title='輸入要查詢的「結束」時間區段',
-            text='選擇要查詢的最後一天，若僅要查詢一天，請選擇和開始時間相同的日期',
+            text='選擇要查詢的最後一天。\n若僅查詢一天，請選擇「和開始時間相同」的日期',
             actions=[
                 DatetimePickerAction(
                     type="datetimepicker",
@@ -190,28 +190,6 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
                     label='取消查詢',
                     display_text='你選擇了「取消查詢」',
                     data='type=reset&day=None'
-                )
-            ]
-        )
-    )
-
-    # this is redundant
-    select_date_confirm = TemplateSendMessage(
-        alt_text='Buttons template',
-        template=ButtonsTemplate(
-            thumbnail_image_url='https://example.com/image.jpg',
-            title='確認選定的日期：',
-            text=str('你選的是：\n- 開始：{0}\n- 結束：{1}？'.format(param['start'], param['end'])),
-            actions=[
-                PostbackAction(
-                    label='是',
-                    display_text='你選擇了「是」',
-                    data='type=confirm&answer=yes'
-                ),
-                PostbackAction(
-                    label='否',
-                    display_text='你選擇了「否」\n請重新選擇日期！',
-                    data='type=confirm&answer=no'
                 )
             ]
         )
@@ -251,8 +229,8 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         )
     )
 
-    final_message = f'sport: {123}'
-
+    # not use on this stage
+    final_message = f''
     confirm  = TemplateSendMessage(
         alt_text='Buttons template',
         template=ButtonsTemplate(
@@ -279,7 +257,7 @@ def send_button_message(reply_token, type, param:dict={'start':'', 'end':''}):
         template=ButtonsTemplate(
             thumbnail_image_url='https://example.com/image.jpg',
             title='要帶你去借場的網站嗎？',
-            text='是：會開啟借場網站；否：重新回到初始狀態',
+            text='- 是：會開啟借場網站\n- 否：重新回到初始狀態',
             actions=[
                 URIAction(
                     label='是',

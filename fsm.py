@@ -10,7 +10,7 @@ class TocMachine(GraphMachine):
     # not_login
     def is_going_to_not_login(self, event):
         text = event.message.text
-        return text.lower() == "login"
+        return text.lower() == "登入"
 
     def on_enter_not_login(self, event=None):
         print("I'm entering \"not_login\"")
